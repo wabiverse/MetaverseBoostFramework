@@ -3,8 +3,8 @@
 import PackageDescription
 
 let version = "1.81.2"
-let moduleName = "Boost"
-let checksum = "273e30fff15c66e65c7c9ec3bfe70bc3f029d69fd293a78652075fcb516c5bb4"
+let moduleName = "boost"
+let checksum = "a4846beef0b8f335a0fd0de5711aec07674e9c804c066e0090d864a31b99e9de"
 
 let package = Package(
     name: moduleName,
