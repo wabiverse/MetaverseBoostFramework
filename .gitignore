@@ -1,0 +1,11 @@
+*.bak
+*.swp
+.DS_Store
+/Info.plist
+/build/
+**/xcuserdata
+/DerivedData/
+/boost.xcframework.tar.bz2
+/boost.xcframework.zip
+/Carthage
+.build
