@@ -44,6 +44,7 @@ The following boost libraries are built
 * random
 * locale
 * python
+* iostreams
 
 The locale library has the POSIX option turned on and the libiconv library supplied with iOS is used.
 

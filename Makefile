@@ -89,7 +89,7 @@ WFLAGS = -Wall -pedantic -Wno-unused-variable -Wno-deprecated-declarations
 # (if -fvisibility=hidden is specified, then -fvisibility-inlines-hidden is unnecessary as inlines are already hidden)
 #
 EXTRA_CPPFLAGS = -DBOOST_AC_USE_PTHREADS -DBOOST_SP_USE_PTHREADS -stdlib=libc++ -std=c++17
-BOOST_LIBS = atomic date_time exception filesystem locale program_options random regex serialization system test thread chrono python
+BOOST_LIBS = atomic date_time exception filesystem locale program_options random regex serialization system test thread chrono python iostreams
 JAM_PROPERTIES = visibility=global
 
 #
@@ -306,9 +306,9 @@ $(MAKER_BUILD_DIR)/$(1)/$(2)/user-config.jam :
 	@echo "      <striper>" >> $$@
 	@echo "    ;" >> $$@
 	@echo "" >> $$@
-	@echo "using python : 3.11 : /opt/homebrew/Cellar/python@3.11/3.11.5/Frameworks/Python.framework/Versions/3.11/bin/python3" >> $$@
-	@echo "    : /opt/homebrew/Cellar/python@3.11/3.11.5/Frameworks/Python.framework/Versions/3.11/include/python3.11" >> $$@
-	@echo "    : /opt/homebrew/Cellar/python@3.11/3.11.5/Frameworks/Python.framework/Versions/3.11/lib/python3.11" >> $$@
+	@echo "using python : 3.11 : /opt/homebrew/Cellar/python@3.11/3.11.6/Frameworks/Python.framework/Versions/3.11/bin/python3" >> $$@
+	@echo "    : /opt/homebrew/Cellar/python@3.11/3.11.6/Frameworks/Python.framework/Versions/3.11/include/python3.11" >> $$@
+	@echo "    : /opt/homebrew/Cellar/python@3.11/3.11.6/Frameworks/Python.framework/Versions/3.11/lib/python3.11" >> $$@
 	@echo "    ;" >> $$@
 
 Build_$(1)_$(2) : $(MAKER_BUILDROOT_DIR)/$(1)/$(2)/$(FRAMEWORKBUNDLE)$(INSTALLED_LIB)
