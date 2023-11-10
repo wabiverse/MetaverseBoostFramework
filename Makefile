@@ -40,7 +40,7 @@ BOOST_VERSION = 1_81_0
 #
 # Release version on GitHub - bump last digit to make new
 # GitHub release with same Boost version.
-VERSION =  1.81.2
+VERSION =  1.81.3
 
 #
 # Download location URL
@@ -430,12 +430,12 @@ $(XCFRAMEWORKBUNDLE).zip : $(BUILT_PRODUCTS_DIR)/$(XCFRAMEWORKBUNDLE)
 .PHONY : release update-spm
 
 release : $(XCFRAMEWORKBUNDLE).zip update-spm
-	$(at)if [ $(GITBRANCH) == 'master' ] ; then \
+	$(at)if [ $(GITBRANCH) == 'main' ] ; then \
 		if ! gh release view $(VERSION)  > /dev/null 2>&1 ; then \
 			echo "creating release $(VERSION)" ; \
 			git commit -m "Update SPM to version $(VERSION)" Package.swift ; \
 			git tag -am "Release Boost for iOS $(VERSION)" $(VERSION) ; \
-			git push origin HEAD:master --follow-tags ; \
+			git push origin HEAD:main --follow-tags ; \
 			gh release create "$(VERSION)" --verify-tag --generate-notes $(XCFRAMEWORKBUNDLE).zip  $(MAKER_INTERMEDIATE_DIR)/$(IPHONEOS_SDK)/$(FRAMEWORKBUNDLE).zip; \
 		else \
 			echo "warning: MetaverseBoostFramework $(VERSION) has already been created: skipping release" ; \
