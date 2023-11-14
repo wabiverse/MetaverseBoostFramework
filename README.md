@@ -30,7 +30,6 @@ It is suitable for using on all macOS, visionOS devices and simulators, and iOS 
 
 The following boost libraries are built
 
-* test
 * thread
 * atomic
 * signals
@@ -72,6 +71,10 @@ To build a universal XCframework:
     make SDK=iphoneos
     make SDK=iphonesimulator
     make xcframework
+
+Or, using Wabi's infamous pwsh profile (builds universal everything in one command):
+
+    make metaframework
 
 ## Active Architectures
 

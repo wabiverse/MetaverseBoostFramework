@@ -40,13 +40,13 @@ BOOST_VERSION = 1_81_0
 #
 # Release version on GitHub - bump last digit to make new
 # GitHub release with same Boost version.
-VERSION =  1.81.3
+VERSION =  1.81.4
 
 #
 # Download location URL
 #
 TARBALL = $(NAME)_$(BOOST_VERSION).tar.bz2
-DOWNLOAD_URL = http://sourceforge.net/projects/boost/files/boost/$(subst _,.,$(BOOST_VERSION))/$(TARBALL)
+DOWNLOAD_URL = https://sourceforge.net/projects/boost/files/boost/$(subst _,.,$(BOOST_VERSION))/$(TARBALL)
 
 #
 # Files used to trigger builds for each architecture
@@ -89,7 +89,7 @@ WFLAGS = -Wall -pedantic -Wno-unused-variable -Wno-deprecated-declarations
 # (if -fvisibility=hidden is specified, then -fvisibility-inlines-hidden is unnecessary as inlines are already hidden)
 #
 EXTRA_CPPFLAGS = -DBOOST_AC_USE_PTHREADS -DBOOST_SP_USE_PTHREADS -stdlib=libc++ -std=c++17
-BOOST_LIBS = atomic date_time exception filesystem locale program_options random regex serialization system test thread chrono python iostreams
+BOOST_LIBS = atomic date_time exception filesystem locale program_options random regex serialization system thread chrono python iostreams
 JAM_PROPERTIES = visibility=global
 
 #
@@ -202,6 +202,7 @@ comma:= ,
 	build \
 	install \
 	carthage \
+	metaframework \
 	clean \
 	build-commence \
 	build-complete \
@@ -220,6 +221,9 @@ all : build
 build : build-commence dirs tarball bootstrap jams builds bundle build-complete
 
 install : install-commence dirs tarball bootstrap jams builds bundle install-complete
+
+metaframework:
+	$(at)(pwsh -Command MakeMetaversalBoostFramework) || exit $?
 
 carthage:
 	carthage build --no-skip-current
@@ -254,7 +258,7 @@ tarball : dirs $(MAKER_ARCHIVES_DIR)/$(TARBALL)
 
 $(MAKER_ARCHIVES_DIR)/$(TARBALL) :
 	@echo "downloading $(DOWNLOAD_URL)"
-	$(at)curl -L --retry 10 --retry-delay 12 -s -o $@ $(DOWNLOAD_URL) || { \
+	$(at)curl -k -L --retry 10 --retry-delay 12 -o $@ $(DOWNLOAD_URL) || { \
 	    $(RM) $@ ; \
 	    exit 1 ; \
 	}
@@ -291,6 +295,11 @@ builds : dirs tarball bootstrap jams $(addprefix Build_$(SDK)_, $(ARCHS))
 # $2 - xcode architecture (arm64, x86_64)
 # $3 - boost toolchain architecture (arm64, x86_64)
 #
+# NOTE: for visionOS, no (-mxros-version-min) or (-mxrsimulator-version-min) flag
+# exists yet, so we omit the flag completely on L.314), then we can use the flags
+# for iOS (-miphoneos-version-min) // (-miphonesimulator-version-min)
+# and for macOS (-mmacosx-version-min).
+#
 define configure_template
 
 Jam_$(1)_$(2) : $(MAKER_BUILD_DIR)/$(1)/$(2) $(MAKER_BUILD_DIR)/$(1)/$(2)/user-config.jam
@@ -299,17 +308,21 @@ $(MAKER_BUILD_DIR)/$(1)/$(2) :
 	$(at)mkdir -p $$@
 
 $(MAKER_BUILD_DIR)/$(1)/$(2)/user-config.jam :
-	@echo using clang-darwin : $(3) > $$@
-	@echo "    : xcrun --sdk $(1) clang++" >> $$@
-	@echo "    : <cxxflags>\"-m$(1)-version-min=$$(MIN_OS_VER) $$(XCODE_BITCODE_FLAG) -arch $(2) $$(EXTRA_CPPFLAGS) $$(JAM_DEFINES) $$(WFLAGS)\"" >> $$@
-	@echo "      <linkflags>\"-arch $(2)\"" >> $$@
-	@echo "      <striper>" >> $$@
-	@echo "    ;" >> $$@
-	@echo "" >> $$@
-	@echo "using python : 3.11 : /opt/homebrew/Cellar/python@3.11/3.11.6/Frameworks/Python.framework/Versions/3.11/bin/python3" >> $$@
-	@echo "    : /opt/homebrew/Cellar/python@3.11/3.11.6/Frameworks/Python.framework/Versions/3.11/include/python3.11" >> $$@
-	@echo "    : /opt/homebrew/Cellar/python@3.11/3.11.6/Frameworks/Python.framework/Versions/3.11/lib/python3.11" >> $$@
-	@echo "    ;" >> $$@
+	echo using clang-darwin : $(3) > $$@; \
+	echo "    : xcrun --sdk $(1) clang++" >> $$@; \
+	if [ $(1) == 'xros' ] ; then \
+		echo "    : <cxxflags>\" $$(XCODE_BITCODE_FLAG) -arch $(2) $$(EXTRA_CPPFLAGS) $$(JAM_DEFINES) $$(WFLAGS)\"" >> $$@; \
+	else \
+		echo "    : <cxxflags>\"-m$(1)-version-min=$$(MIN_OS_VER) $$(XCODE_BITCODE_FLAG) -arch $(2) $$(EXTRA_CPPFLAGS) $$(JAM_DEFINES) $$(WFLAGS)\"" >> $$@; \
+	fi ; \
+	echo "      <linkflags>\"-arch $(2)\"" >> $$@; \
+	echo "      <striper>" >> $$@; \
+	echo "    ;" >> $$@; \
+	echo "" >> $$@; \
+	echo "using python : 3.11 : /opt/homebrew/Cellar/python@3.11/3.11.6/Frameworks/Python.framework/Versions/3.11/bin/python3" >> $$@; \
+	echo "    : /opt/homebrew/Cellar/python@3.11/3.11.6/Frameworks/Python.framework/Versions/3.11/include/python3.11" >> $$@; \
+	echo "    : /opt/homebrew/Cellar/python@3.11/3.11.6/Frameworks/Python.framework/Versions/3.11/lib/python3.11" >> $$@; \
+	echo "    ;" >> $$@; \
 
 Build_$(1)_$(2) : $(MAKER_BUILDROOT_DIR)/$(1)/$(2)/$(FRAMEWORKBUNDLE)$(INSTALLED_LIB)
 
